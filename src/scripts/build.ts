@@ -11,7 +11,7 @@ export default async function build(buildConstants: IBuildConstantsBase) {
   console.log(await execAsync(`npm run build--clean`));
 
   // Compile typescript
-  console.log(await execAsync(`tsc --project .`));
+  console.log(await execAsync(`tsc --project .`, true));
 
   // Enter build folder
   process.chdir(buildConstants.tsBuildFolder);

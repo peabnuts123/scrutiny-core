@@ -171,7 +171,7 @@ export default async function deploy(buildConstants: IBuildConstantsBase, option
   if (!isStep05Skipped) {
     try {
       // Copy project to publish directory
-      await execAsync(`cp -r ${buildConstants.tsBuildFolder}/src ${buildConstants.publishDirectory}`);
+      await execAsync(`cp -r ${buildConstants.tsBuildFolder}/src ${buildConstants.publishDirectory}`, true);
     } catch (e) {
       console.error(e);
       console.error("Failed to copy project to publish directory");
@@ -181,7 +181,7 @@ export default async function deploy(buildConstants: IBuildConstantsBase, option
 
     try {
       // Copy package.json into build directory
-      await execAsync(`cp package.json ${buildConstants.publishDirectory}`);
+      await execAsync(`cp package.json ${buildConstants.publishDirectory}`, true);
     } catch (e) {
       console.error(e);
       console.error("Failed to copy package.json into output directory");
