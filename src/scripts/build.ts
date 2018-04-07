@@ -7,17 +7,17 @@ export default async function build(buildConstants: IBuildConstantsBase) {
   process.on('exit', cleanUp);
 
   try {
-  // Clean previous build before building
-  console.log(await execAsync(`npm run build--clean`));
+    // Clean previous build before building
+    console.log(await execAsync(`npm run build--clean`));
 
-  // Compile typescript
-  console.log(await execAsync(`tsc --project .`, true));
+    // Compile typescript
+    console.log(await execAsync(`tsc --project .`, true));
 
-  // Enter build folder
-  process.chdir(buildConstants.tsBuildFolder);
+    // Enter build folder
+    process.chdir(buildConstants.tsBuildFolder);
 
-  console.log("Rewriting import statements");
-  rewriteImports('src', buildConstants);
+    console.log("Rewriting import statements");
+    rewriteImports('./', buildConstants);
   } catch (err) {
     console.error(err);
     process.exit(-1);
