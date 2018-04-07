@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import get from '@app/util/get';
+import { get } from '@app/util';
 
 
 describe("get", () => {

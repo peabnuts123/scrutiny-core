@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 
-import Package, { IPackageDetails } from '@app/Package';
-import ClassBuilder from '@app/util/ClassBuilder';
+import { IPackageDetails, Package } from '@app/index';
+import { Builder, ObjectBuilder } from '@app/util';
 
 describe("Package", () => {
   describe("construction", () => {
@@ -11,7 +11,7 @@ describe("Package", () => {
       let packageBuilder = CreateMockPackageBuilder();
 
       // Test
-      let pkg = ClassBuilder.assemble(packageBuilder, Package);
+      let pkg = ObjectBuilder.assemble(packageBuilder);
       expect(pkg).to.be.an.instanceOf(Package);
     });
     it("fails when missing `name` parameter", () => {
@@ -22,7 +22,7 @@ describe("Package", () => {
 
       // Test
       let testFunc = () => {
-        ClassBuilder.assemble(packageBuilder, Package);
+        ObjectBuilder.assemble(packageBuilder);
       };
 
       // Assert
@@ -36,7 +36,7 @@ describe("Package", () => {
 
       // Test
       let testFunc = () => {
-        ClassBuilder.assemble(packageBuilder, Package);
+        ObjectBuilder.assemble(packageBuilder);
       };
 
       // Assert
@@ -50,7 +50,7 @@ describe("Package", () => {
 
       // Test
       let testFunc = () => {
-        ClassBuilder.assemble(packageBuilder, Package);
+        ObjectBuilder.assemble(packageBuilder);
       };
 
       // Assert
@@ -63,7 +63,7 @@ describe("Package", () => {
       });
 
       // Test
-      let pkg = ClassBuilder.assemble(packageBuilder, Package);
+      let pkg = ObjectBuilder.assemble(packageBuilder);
 
       // Assert
       expect(pkg.hasError).to.be.false;
@@ -77,33 +77,46 @@ describe("Package", () => {
       });
 
       // Test
-      let pkg = ClassBuilder.assemble(packageBuilder, Package);
+      let pkg = ObjectBuilder.assemble(packageBuilder);
 
       // Assert
       expect(pkg).to.be.an.instanceOf(Package);
     });
+    it("fails without all required details properties", () => {
+      // Setup
+      let packageBuilder = CreateMockPackageBuilder({}, {
+        publishAuthor: undefined,
+      });
+
+      // Test
+      let testFunc = () => {
+        ObjectBuilder.assemble(packageBuilder);
+      };
+
+      // Assert
+      expect(testFunc).to.throw;
+    });
   });
 });
 
-function CreateMockPackageBuilder(overrides: Partial<Package> = {}, detailsOverrides: Partial<IPackageDetails> = {}): Partial<Package> {
-  let packageDetailsBuilder: Partial<IPackageDetails> = ClassBuilder.create<IPackageDetails>({
-    homepage: "https://github.com/peabnuts123/mock-package",
-    isVersionDataMissing: false,
-    license: "UNLICENSED",
-    name: "mock-package",
-    publishAuthor: "peabnuts123",
-    publishDate: new Date(2018, 3, 18),
-    repositoryUrl: "https://github.com/peabnuts123/mock-package.git",
-    version: "0.1.0",
-  });
-  packageDetailsBuilder = _.assign(packageDetailsBuilder, detailsOverrides);
-
-  let packageBuilder: Partial<Package> = ClassBuilder.create<Package>({
-    details: ClassBuilder.assemble(packageDetailsBuilder),
+function CreateMockPackageBuilder(overrides: Partial<Package> = {}, detailsOverrides: Partial<IPackageDetails> = {}): Builder<Package> {
+  let packageBuilder: Builder<Package> = ObjectBuilder.create(Package, {
+    details: {
+      homepage: "https://github.com/peabnuts123/mock-package",
+      isVersionDataMissing: false,
+      license: "UNLICENSED",
+      name: "mock-package",
+      publishAuthor: "peabnuts123",
+      publishDate: new Date(2018, 3, 18),
+      repositoryUrl: "https://github.com/peabnuts123/mock-package.git",
+      version: "0.1.0",
+    },
     hasError: false,
     name: "mock-package",
     version: "0.1.0",
   });
+
+  _.assign(packageBuilder.details, detailsOverrides);
 
   return _.assign(packageBuilder, overrides);
 }

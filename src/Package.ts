@@ -1,5 +1,8 @@
 import _ from 'lodash';
 
+import { Builder } from '@app/util';
+import { ValidateAs } from '@app/util';
+
 export interface IPackageDetails {
   publishDate: Date | null;
   publishAuthor: string | null;
@@ -18,40 +21,16 @@ export default class Package {
   public error: any;
   public details: IPackageDetails | null;
 
-  constructor(source: Partial<Package>) {
-    this.name = ValidateAsRequired(source, 'name');
-    this.version = ValidateAsRequired(source, 'version');
+  constructor(source: Builder<Package>) {
+    this.name = ValidateAs.Required(source, 'name');
+    this.version = ValidateAs.Required(source, 'version');
     this.hasError = _.defaultTo(source.hasError, false);
     this.error = source.error;
-    this.details = ValidateAsRequiredIfFalsy(source, 'details', 'hasError');
+    this.details = ValidateAs.RequiredOnCondition(source, 'details', () => !this.hasError);
   }
 
   // @TODO This may need to be a bit more sophisticated
   public get PackageSpecifier(): string {
     return `${this.name}@${this.version}`;
-  }
-}
-
-// @TODO put somewhere!
-// @TODO ValidateAsRequiredIfTruthy
-function ValidateAsRequiredIfFalsy<T, K extends keyof T, K2 extends keyof T>(source: Partial<T>, propertyName: K, dependentPropertyName: K2): T[K] | null {
-  // If required
-  if (!source[dependentPropertyName]) {
-    return ValidateAsRequired(source, propertyName);
-  } else {
-    // Not required but may still have a value
-    if (!_.isNil(source[propertyName])) {
-      return source[propertyName] as T[K];
-    } else {
-      return null;
-    }
-  }
-}
-
-function ValidateAsRequired<T, K extends keyof T>(source: Partial<T>, propertyName: K): T[K] {
-  if (_.isNil(source[propertyName])) {
-    throw new Error(`Property '${propertyName}' is undefined, but marked as required`);
-  } else {
-    return source[propertyName] as T[K];
   }
 }
