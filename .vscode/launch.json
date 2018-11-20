@@ -46,7 +46,8 @@
         "tsconfig-paths/register"
       ],
       "args": [
-        "${workspaceRoot}/scripts/build.ts",
+        "${workspaceRoot}/scripts/deploy.ts",
+        "--dry-run"
       ]
     }
   ]
