@@ -59,7 +59,7 @@ class NestedClass {
 describe('ObjectBuilder', () => {
   it('can create an interface-type builder with no default values', () => {
     // Test
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
+    let dummyInterfaceBuilder = ObjectBuilder.create(AssembleDummyInterface);
     dummyInterfaceBuilder.name = "Hello";
     dummyInterfaceBuilder.value = 20;
 
@@ -69,7 +69,7 @@ describe('ObjectBuilder', () => {
   });
   it('can create an interface-type builder with default values', () => {
     // Test
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
+    let dummyInterfaceBuilder = ObjectBuilder.create(AssembleDummyInterface, {
       name: "Hello",
       value: 20,
     });
@@ -101,7 +101,7 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a valid interface-type builder', () => {
     // Setup
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
+    let dummyInterfaceBuilder = ObjectBuilder.create(AssembleDummyInterface, {
       name: "Hello",
       value: 20,
     });
@@ -129,7 +129,7 @@ describe('ObjectBuilder', () => {
   });
   it('fails to re-assemble an invalid interface-type builder', () => {
     // Setup
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
+    let dummyInterfaceBuilder = ObjectBuilder.create(AssembleDummyInterface);
 
     // Test
     let testFunc = () => {
@@ -164,7 +164,7 @@ describe('ObjectBuilder', () => {
     });
     it('returns true for an interface-type Builder instance', () => {
       // Setup
-      let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
+      let dummyInterfaceBuilder = ObjectBuilder.create(AssembleDummyInterface);
 
       // Test
       let needsAssembling = ObjectBuilder.needsAssembling(dummyInterfaceBuilder);
@@ -231,7 +231,7 @@ describe('ObjectBuilder', () => {
     // Setup
     let nestedInterfaceBuilder = ObjectBuilder.create(NestedInterface.Assemble, {
       name: "Hello",
-      dummyInterface: ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
+      dummyInterface: ObjectBuilder.create(AssembleDummyInterface, {
         name: "Hello",
         value: 20,
       }),

@@ -13,16 +13,16 @@ export interface IPackageDetails {
   license: string;
 }
 
-export function AssemblePackageDetails(source: Builder<IPackageDetails | null>): IPackageDetails | null {
+export function AssemblePackageDetails(source: Builder<IPackageDetails>): IPackageDetails {
   return {
     publishDate: ValidateAs.Optional(source, 'publishDate'),
     publishAuthor: ValidateAs.Optional(source, 'publishAuthor'),
     version: ValidateAs.Required(source, 'version'),
     isVersionDataMissing: ValidateAs.Required(source, 'isVersionDataMissing'),
     name: ValidateAs.Required(source, 'name'),
-    repositoryUrl: ValidateAs.Required(source, 'repositoryUrl'),
-    homepage: ValidateAs.Required(source, 'homepage'),
-    license: ValidateAs.Required(source, 'license'),
+    repositoryUrl: ValidateAs.Optional(source, 'repositoryUrl', ''),
+    homepage: ValidateAs.Optional(source, 'homepage', ''),
+    license: ValidateAs.Optional(source, 'license', ''),
   };
 }
 

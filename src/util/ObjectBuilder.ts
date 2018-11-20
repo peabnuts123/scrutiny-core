@@ -10,15 +10,16 @@ export const isBuilderSymbol = Symbol("isBuilder");
 export type DeepPartial<T> = {
   [K in keyof T]?: Builder<T[K]> | T[K];
 };
+type NonNullable<T> = T extends (null | undefined) ? never : T;
+type ConstructorFunction<T> = (source: Builder<T>) => NonNullable<T>;
 // Builder is a DeepPartial but also it has a constructor function
 //  and a property (always true) that says it is a Builder Instance
 //  for telling at runtime what is a builder instance
 export type Builder<T> = DeepPartial<NonNullable<T>> & {
-  [constructorSymbol]: (source: Builder<T>) => T;
+  [constructorSymbol]: ConstructorFunction<T>;
   [isBuilderSymbol]: boolean; // @TODO can this be type "true"
 };
 
-type NonNullable<T> = T extends (null | undefined) ? never : T;
 
 
 /**
@@ -53,7 +54,7 @@ type NonNullable<T> = T extends (null | undefined) ? never : T;
  */
 
 export default class ObjectBuilder {
-  public static create<T>(constructorFunction: (source: Builder<T>) => T, defaultValues: DeepPartial<NonNullable<T>> = {}): Builder<T> {
+  public static create<T>(constructorFunction: ConstructorFunction<T>, defaultValues: DeepPartial<NonNullable<T>> = {}): Builder<T> {
     let builder: Builder<T> = _.assign({
       [constructorSymbol]: constructorFunction,
       [isBuilderSymbol]: true,
@@ -81,7 +82,7 @@ export default class ObjectBuilder {
    * @template T
    * @returns Real instance of type `T`
    */
-  public static assemble<T>(source: Builder<T>): T {
+  public static assemble<T>(source: Builder<T>): NonNullable<T> {
     return source[constructorSymbol](source);
   }
 }

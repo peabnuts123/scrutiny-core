@@ -183,7 +183,7 @@ describe('ValidateAs', () => {
 });
 
 function createDummyObject(propertyValue: any) {
-  return ObjectBuilder.create<IPropertyHolder>(AssemblePropertyHolder, {
+  return ObjectBuilder.create(AssemblePropertyHolder, {
     [PROPERTY_KEY]: propertyValue,
   });
 }
