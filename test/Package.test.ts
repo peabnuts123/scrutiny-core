@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 
-import { IPackageDetails, Package } from '@app/index';
+import Package, { AssemblePackageDetails, IPackageDetails } from '@app/Package';
 import { Builder, ObjectBuilder } from '@app/util';
 
 describe("Package", () => {
@@ -85,7 +85,7 @@ describe("Package", () => {
     it("fails without all required details properties", () => {
       // Setup
       let packageBuilder = CreateMockPackageBuilder({}, {
-        publishAuthor: undefined,
+        name: undefined,
       });
 
       // Test
@@ -94,29 +94,32 @@ describe("Package", () => {
       };
 
       // Assert
-      expect(testFunc).to.throw;
+      expect(testFunc).to.throw();
     });
   });
 });
 
 function CreateMockPackageBuilder(overrides: Partial<Package> = {}, detailsOverrides: Partial<IPackageDetails> = {}): Builder<Package> {
-  let packageBuilder: Builder<Package> = ObjectBuilder.create(Package, {
-    details: {
-      homepage: "https://github.com/peabnuts123/mock-package",
-      isVersionDataMissing: false,
-      license: "UNLICENSED",
-      name: "mock-package",
-      publishAuthor: "peabnuts123",
-      publishDate: new Date(2018, 3, 18),
-      repositoryUrl: "https://github.com/peabnuts123/mock-package.git",
-      version: "0.1.0",
-    },
+  let packageDetailsBuilder = ObjectBuilder.create(AssemblePackageDetails, {
+    homepage: "https://github.com/peabnuts123/mock-package",
+    isVersionDataMissing: false,
+    license: "UNLICENSED",
+    name: "mock-package",
+    publishAuthor: "peabnuts123",
+    publishDate: new Date(2018, 3, 18),
+    repositoryUrl: "https://github.com/peabnuts123/mock-package.git",
+    version: "0.1.0",
+  });
+
+  _.assign(packageDetailsBuilder, detailsOverrides);
+
+
+  let packageBuilder: Builder<Package> = ObjectBuilder.create(Package.Assemble, {
+    details: packageDetailsBuilder,
     hasError: false,
     name: "mock-package",
     version: "0.1.0",
   });
-
-  _.assign(packageBuilder.details, detailsOverrides);
 
   return _.assign(packageBuilder, overrides);
 }

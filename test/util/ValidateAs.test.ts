@@ -8,6 +8,9 @@ const PROPERTY_KEY = 'property';
 interface IPropertyHolder {
   [PROPERTY_KEY]: any;
 }
+function AssemblePropertyHolder(source: Builder<IPropertyHolder>): IPropertyHolder {
+  return source as IPropertyHolder;
+}
 class DummyClass {
   public name: string;
   public value: number;
@@ -15,6 +18,10 @@ class DummyClass {
   constructor(sourceBuilder: Builder<DummyClass>) {
     this.name = sourceBuilder.name as string;
     this.value = sourceBuilder.value as number;
+  }
+
+  public static Assemble(source: Builder<DummyClass>): DummyClass {
+    return new DummyClass(source);
   }
 }
 interface IDummyObject {
@@ -52,7 +59,7 @@ describe('ValidateAs', () => {
     });
     it('returns the value of a nested Builder instance property', () => {
       // Setup
-      let propertyValue = ObjectBuilder.create(DummyClass, {
+      let propertyValue = ObjectBuilder.create(DummyClass.Assemble, {
         name: "Hello",
         value: 20,
       });
@@ -77,11 +84,11 @@ describe('ValidateAs', () => {
       };
 
       // Assert
-      expect(testFunc).to.throw;
+      expect(testFunc).to.throw();
     });
     it('throws an error when requested property is undefined', () => {
       // Setup
-      // tslint:disable-next-line
+      // tslint:disable-next-line:no-unnecessary-initializer
       let propertyValue = undefined;
       let source = createDummyObject(propertyValue);
 
@@ -91,7 +98,7 @@ describe('ValidateAs', () => {
       };
 
       // Assert
-      expect(testFunc).to.throw;
+      expect(testFunc).to.throw();
     });
   });
   describe('RequiredOnCondition', () => {
@@ -117,7 +124,7 @@ describe('ValidateAs', () => {
       };
 
       // Assert
-      expect(testFunc).to.throw;
+      expect(testFunc).to.throw();
     });
     it('returns the value of a primitive property when not required', () => {
       // Setup
@@ -146,7 +153,7 @@ describe('ValidateAs', () => {
     });
     it('returns the value of a nested Builder instance property when not required', () => {
       // Setup
-      let propertyValue = ObjectBuilder.create(DummyClass, {
+      let propertyValue = ObjectBuilder.create(DummyClass.Assemble, {
         name: "Hello",
         value: 20,
       });
@@ -162,7 +169,7 @@ describe('ValidateAs', () => {
     });
     it('returns null when property does not contain a value and not required', () => {
       // Setup
-      // tslint:disable-next-line
+      // tslint:disable-next-line:no-unnecessary-initializer
       let propertyValue = undefined;
       let source = createDummyObject(propertyValue);
 
@@ -170,13 +177,13 @@ describe('ValidateAs', () => {
       let value = ValidateAs.RequiredOnCondition(source, PROPERTY_KEY, () => false);
 
       // Assert
-      expect(value).to.equal(propertyValue);
+      expect(value).to.equal(null);
     });
   });
 });
 
 function createDummyObject(propertyValue: any) {
-  return ObjectBuilder.create<IPropertyHolder>({
+  return ObjectBuilder.create<IPropertyHolder>(AssemblePropertyHolder, {
     [PROPERTY_KEY]: propertyValue,
   });
 }

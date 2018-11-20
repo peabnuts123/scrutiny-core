@@ -6,6 +6,12 @@ interface IDummyInterface {
   name: string;
   value: number;
 }
+function AssembleDummyInterface(source: Builder<IDummyInterface>): IDummyInterface {
+  return {
+    name: ValidateAs.Required(source, 'name'),
+    value: ValidateAs.Required(source, 'value'),
+  };
+}
 
 // Mock class for testing
 class DummyClass {
@@ -16,8 +22,12 @@ class DummyClass {
     this.name = ValidateAs.Required(source, 'name');
     this.value = ValidateAs.Required(source, 'value');
   }
+
+  public static Assemble(source: Builder<DummyClass>): DummyClass {
+    return new DummyClass(source);
+  }
 }
-// tslint:disable-next-line
+// tslint:disable-next-line:max-classes-per-file
 class NestedInterface {
   public name: string;
   public dummyInterface: IDummyInterface;
@@ -26,8 +36,12 @@ class NestedInterface {
     this.name = ValidateAs.Required(source, 'name');
     this.dummyInterface = ValidateAs.Required(source, 'dummyInterface');
   }
+
+  public static Assemble(source: Builder<NestedInterface>): NestedInterface {
+    return new NestedInterface(source);
+  }
 }
-// tslint:disable-next-line
+// tslint:disable-next-line:max-classes-per-file
 class NestedClass {
   public name: string;
   public dummyClass: DummyClass;
@@ -36,12 +50,16 @@ class NestedClass {
     this.name = ValidateAs.Required(source, 'name');
     this.dummyClass = ValidateAs.Required(source, 'dummyClass');
   }
+
+  public static Assemble(source: Builder<NestedClass>): NestedClass {
+    return new NestedClass(source);
+  }
 }
 
 describe('ObjectBuilder', () => {
   it('can create an interface-type builder with no default values', () => {
     // Test
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>();
+    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
     dummyInterfaceBuilder.name = "Hello";
     dummyInterfaceBuilder.value = 20;
 
@@ -51,7 +69,7 @@ describe('ObjectBuilder', () => {
   });
   it('can create an interface-type builder with default values', () => {
     // Test
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>({
+    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
       name: "Hello",
       value: 20,
     });
@@ -62,7 +80,7 @@ describe('ObjectBuilder', () => {
   });
   it('can create a class-type builder with no default values', () => {
     // Test
-    let dummyClassBuilder = ObjectBuilder.create(DummyClass);
+    let dummyClassBuilder = ObjectBuilder.create(DummyClass.Assemble);
     dummyClassBuilder.name = "Hello";
     dummyClassBuilder.value = 20;
 
@@ -72,7 +90,7 @@ describe('ObjectBuilder', () => {
   });
   it('can create a class-type builder with default values', () => {
     // Test
-    let dummyClassBuilder = ObjectBuilder.create(DummyClass, {
+    let dummyClassBuilder = ObjectBuilder.create(DummyClass.Assemble, {
       name: "Hello",
       value: 20,
     });
@@ -83,7 +101,7 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a valid interface-type builder', () => {
     // Setup
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>({
+    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
       name: "Hello",
       value: 20,
     });
@@ -97,7 +115,7 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a valid class-type builder', () => {
     // Setup
-    let dummyClassBuilder = ObjectBuilder.create(DummyClass, {
+    let dummyClassBuilder = ObjectBuilder.create(DummyClass.Assemble, {
       name: "Hello",
       value: 20,
     });
@@ -111,7 +129,7 @@ describe('ObjectBuilder', () => {
   });
   it('fails to re-assemble an invalid interface-type builder', () => {
     // Setup
-    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>();
+    let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
 
     // Test
     let testFunc = () => {
@@ -119,11 +137,11 @@ describe('ObjectBuilder', () => {
     };
 
     // Assert
-    expect(testFunc).to.throw;
+    expect(testFunc).to.throw();
   });
   it('fails to re-assemble an invalid class-type builder', () => {
     // Setup
-    let dummyClassBuilder = ObjectBuilder.create(DummyClass);
+    let dummyClassBuilder = ObjectBuilder.create(DummyClass.Assemble);
 
     // Test
     let testFunc = () => {
@@ -131,12 +149,12 @@ describe('ObjectBuilder', () => {
     };
 
     // Assert
-    expect(testFunc).to.throw;
+    expect(testFunc).to.throw();
   });
   describe('needsAssembling', () => {
     it('returns true for a class-type Builder instance', () => {
       // Setup
-      let dummyClassBuilder = ObjectBuilder.create(DummyClass);
+      let dummyClassBuilder = ObjectBuilder.create(DummyClass.Assemble);
 
       // Test
       let needsAssembling = ObjectBuilder.needsAssembling(dummyClassBuilder);
@@ -146,7 +164,7 @@ describe('ObjectBuilder', () => {
     });
     it('returns true for an interface-type Builder instance', () => {
       // Setup
-      let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>();
+      let dummyInterfaceBuilder = ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface);
 
       // Test
       let needsAssembling = ObjectBuilder.needsAssembling(dummyInterfaceBuilder);
@@ -179,7 +197,7 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a valid interface nested within a valid class', () => {
     // Setup
-    let nestedInterfaceBuilder = ObjectBuilder.create(NestedInterface, {
+    let nestedInterfaceBuilder = ObjectBuilder.create(NestedInterface.Assemble, {
       name: "Hello",
       dummyInterface: {
         name: "Hello",
@@ -195,7 +213,7 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a valid class nested within a valid class', () => {
     // Setup
-    let nestedClassBuilder = ObjectBuilder.create(NestedClass, {
+    let nestedClassBuilder = ObjectBuilder.create(NestedClass.Assemble, {
       name: "Hello",
       dummyClass: {
         name: "Hello",
@@ -211,9 +229,9 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble an interface-type builder nested within a valid class', () => {
     // Setup
-    let nestedInterfaceBuilder = ObjectBuilder.create(NestedInterface, {
+    let nestedInterfaceBuilder = ObjectBuilder.create(NestedInterface.Assemble, {
       name: "Hello",
-      dummyInterface: ObjectBuilder.create<IDummyInterface>({
+      dummyInterface: ObjectBuilder.create<IDummyInterface>(AssembleDummyInterface, {
         name: "Hello",
         value: 20,
       }),
@@ -227,9 +245,9 @@ describe('ObjectBuilder', () => {
   });
   it('can re-assemble a class-type builder nested within a valid class', () => {
     // Setup
-    let nestedClassBuilder = ObjectBuilder.create(NestedClass, {
+    let nestedClassBuilder = ObjectBuilder.create(NestedClass.Assemble, {
       name: "Hello",
-      dummyClass: ObjectBuilder.create(DummyClass, {
+      dummyClass: ObjectBuilder.create(DummyClass.Assemble, {
         name: "Hello",
         value: 20,
       }),

@@ -1,6 +1,8 @@
-import Package, { IPackageDetails } from '@app/Package';
+import Package, { IFailedPackage, IPackageDetails, ISuccessfulPackage } from '@app/Package';
 
 export {
   Package,
   IPackageDetails,
+  ISuccessfulPackage,
+  IFailedPackage,
 };

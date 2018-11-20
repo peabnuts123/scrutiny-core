@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
-import { Builder } from '@app/util';
-import { ValidateAs } from '@app/util';
+import { Builder, ValidateAs } from '@app/util';
 
 export interface IPackageDetails {
   publishDate: Date | null;
@@ -12,6 +11,19 @@ export interface IPackageDetails {
   repositoryUrl: string;
   homepage: string;
   license: string;
+}
+
+export function AssemblePackageDetails(source: Builder<IPackageDetails | null>): IPackageDetails | null {
+  return {
+    publishDate: ValidateAs.Optional(source, 'publishDate'),
+    publishAuthor: ValidateAs.Optional(source, 'publishAuthor'),
+    version: ValidateAs.Required(source, 'version'),
+    isVersionDataMissing: ValidateAs.Required(source, 'isVersionDataMissing'),
+    name: ValidateAs.Required(source, 'name'),
+    repositoryUrl: ValidateAs.Required(source, 'repositoryUrl'),
+    homepage: ValidateAs.Required(source, 'homepage'),
+    license: ValidateAs.Required(source, 'license'),
+  };
 }
 
 export default class Package {
@@ -26,11 +38,37 @@ export default class Package {
     this.version = ValidateAs.Required(source, 'version');
     this.hasError = _.defaultTo(source.hasError, false);
     this.error = source.error;
-    this.details = ValidateAs.RequiredOnCondition(source, 'details', () => !this.hasError);
+    this.details = ValidateAs.RequiredOnCondition(source, 'details', () => this.didSucceed());
+  }
+
+  public didSucceed(): this is ISuccessfulPackage {
+    return !this.hasError;
+  }
+
+  public didFail(): this is IFailedPackage {
+    return !this.didSucceed();
   }
 
   // @TODO This may need to be a bit more sophisticated
   public get PackageSpecifier(): string {
     return `${this.name}@${this.version}`;
   }
+
+  public static Assemble(source: Builder<Package>): Package {
+    return new Package(source);
+  }
+}
+
+/**
+ * Interfaces for packages that installed successfully / failed to install.
+ * Useful for dealing with collections of Packages that ALL succeeded/failed to avoid
+ * having to wrap every reference in a call to `didSucceed()/didFail()`
+ */
+export interface ISuccessfulPackage extends Package {
+  hasError: false;
+  details: IPackageDetails;
+}
+export interface IFailedPackage extends Package {
+  hasError: true;
+  details: null;
 }
